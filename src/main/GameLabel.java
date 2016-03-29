@@ -75,6 +75,8 @@ public class GameLabel extends JLabel implements ActionListener, KeyListener {
 		fallingTimer.start();
 		
 		addKeyListener(this);
+		setBackground(Color.BLACK);
+		setOpaque(true);
 	}
 	
 	public void paint(Graphics g) {
