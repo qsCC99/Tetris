@@ -30,6 +30,7 @@ import main.GameLabel;
 public abstract class Tetromino {
 	Coordinate position; // 骨牌中心在[背景坐标系]中的位置
 	GameLabel g;
+	int rotationState;
 	
 	/**
 	 * 初始化骨牌
@@ -37,6 +38,7 @@ public abstract class Tetromino {
 	 */
 	Tetromino(GameLabel _g) {
 		g = _g;
+		rotationState = new Random().nextInt(4);
 		position = new Coordinate(GameLabel.width / 2,
 									GameLabel.height);
 	}
@@ -48,17 +50,11 @@ public abstract class Tetromino {
 	abstract public Color getColor();
 	
 	/**
-	 * 获取骨牌各方块在[自身坐标系]中的位置
-	 * @return 骨牌各方块在[自身坐标系]中的坐标
-	 */
-	abstract Coordinate[] getBlock();
-	
-	/**
 	 * 获取骨牌各方块在[背景坐标系]中的位置
 	 * @return 骨牌各方块在[背景坐标系]中的坐标
 	 */
 	public Coordinate[] getAbsoluteBlock() {
-		return getAbsoluteBlock(position); 
+		return getAbsoluteBlock(getBlock(), position); 
 	}
 	
 	/**
@@ -98,6 +94,13 @@ public abstract class Tetromino {
 				return;
 			}
 		}
+	}
+	
+	public boolean rotate() {
+		if(!rotateValid())
+		   return false;
+		rotationState = (rotationState + 1) % 4;
+		return true;
 	}
 	
 	/** 
@@ -163,14 +166,32 @@ public abstract class Tetromino {
 	}
 	
 	/**
-	 * 指定一个新的骨牌中心，获取骨牌各方块在[背景坐标系]中的位置
+	 * 获取骨牌各方块在[自身坐标系]中的位置
+	 * @return 骨牌各方块在[自身坐标系]中的坐标
+	 */
+	abstract Coordinate[] getBlock();
+	
+	/**
+	 * 获取骨牌旋转后在[自身坐标系]中的位置
+	 */
+	abstract Coordinate[] getRotatedBlock();
+	
+	/**
+	 * 旋转是否受到周围方格阻碍
+	 */
+	abstract boolean isRotationForbidden();
+	
+	/**
+	 * 根据各方块的在自身坐标系中的坐标，以及骨牌在坐标系中的位置，
+	 * 合成得到各方块在背景坐标系中的位置。
 	 * @param pos 新的骨牌中心坐标
 	 * @return 骨牌各方块在[背景坐标系]中的坐标
 	 */
-	Coordinate[] getAbsoluteBlock(Coordinate pos) {
+	static Coordinate[] getAbsoluteBlock(Coordinate[] blocks,
+			Coordinate pos) {
 		Coordinate[] ret = new Coordinate[4];
 		for(int i=0; i<4; i++)
-			ret[i] = Coordinate.add(getBlock()[i], pos);
+			ret[i] = Coordinate.add(blocks[i], pos);
 		return ret;
 	}
 	
@@ -193,16 +214,38 @@ public abstract class Tetromino {
 	 * @return 是否合法
 	 */
 	boolean moveValid(Coordinate newPos) {
-		Coordinate[] absolutePos = getAbsoluteBlock(newPos);
-		for(int i=0; i<4; i++) {
-			if(absolutePos[i].y < 0) // 下落超过边界
+		Coordinate[] absolutePos = getAbsoluteBlock(getBlock(), newPos);
+		for(int i=0; i<4; i++)
+			if(!posValid(absolutePos[i]))
 				return false;
-			if(absolutePos[i].x < 0 || absolutePos[i].x >= GameLabel.width) // 左右移动超过边界
+		return true;
+	}
+	
+	/**
+	 * 骨牌旋转是否合法
+	 */
+	boolean rotateValid() {
+		Coordinate[] rotatedPos = getAbsoluteBlock(
+				getRotatedBlock(), position);
+		for(int i=0; i<4; i++)
+			if(!posValid(rotatedPos[i]))
 				return false;
-			if(absolutePos[i].y < GameLabel.height && 
-					g.isBlockOccupied(absolutePos[i].x, absolutePos[i].y))
-				return false;
-		}
+		
+		return !isRotationForbidden();
+	}
+	
+	/**
+	 * 方块位置是否合法
+	 * @param p 方块在背景坐标系中的位置
+	 */
+	boolean posValid(Coordinate p) {
+		if(p.y < 0) // 下落超过边界
+			return false;
+		if(p.x < 0 || p.x >= GameLabel.width) // 左右移动超过边界
+			return false;
+		if(p.y < GameLabel.height && 
+				g.isBlockOccupied(p.x, p.y))
+			return false;
 		return true;
 	}
 }

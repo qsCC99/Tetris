@@ -131,6 +131,7 @@ public class GameLabel extends JLabel implements ActionListener, KeyListener {
 	/** 
 	 * 按下按键的操作：
 	 * 左右移动方块
+	 * 方块旋转
 	 * 加速方块下落
 	 * 方块直接下落到底端
 	 */
@@ -141,6 +142,9 @@ public class GameLabel extends JLabel implements ActionListener, KeyListener {
 			break;
 		case KeyEvent.VK_RIGHT: // 方块向右移动
 			currentTetromino.moveRight();
+			break;
+		case KeyEvent.VK_UP: // 方块旋转
+			currentTetromino.rotate();
 			break;
 		case KeyEvent.VK_DOWN: // 加速方块下落
 			currentTetromino.moveDown();

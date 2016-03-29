@@ -43,4 +43,23 @@ public class OTetromino extends Tetromino {
 	Coordinate[] getBlock() {
 		return block;
 	}
+
+	Coordinate[] getRotatedBlock() {
+		return block;
+	}
+
+	@Override
+	/**
+	 * O形骨牌旋转后不变
+	 */
+	public boolean rotate() {
+		return true;
+	}
+
+	/**
+	 * O形骨牌没有特殊的旋转阻碍规则
+	 */
+	boolean isRotationForbidden() {
+		return false;
+	}
 }
