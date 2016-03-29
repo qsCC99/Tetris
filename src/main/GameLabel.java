@@ -109,8 +109,15 @@ public class GameLabel extends JLabel implements ActionListener, KeyListener {
 			if(!currentTetromino.moveDown()) {
 				// 不能再下落，将方块固定到背景中
 				Coordinate[] b = currentTetromino.getAbsoluteBlock();
-				for(int i=0; i<4; i++)
-					grid[b[i].y][b[i].x] = currentTetromino.getColor();
+				try {
+					for(int i=0; i<4; i++)
+						grid[b[i].y][b[i].x] = currentTetromino.getColor();
+				} catch(ArrayIndexOutOfBoundsException ex) {
+					System.out.println("你输了");
+					fallingTimer.stop();
+					animationTimer.stop();
+					return;
+				}
 				scoring(); // 尝试消行
 				currentTetromino = new OTetromino(this);
 				fallingTimer.restart(); 
