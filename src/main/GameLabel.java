@@ -53,8 +53,10 @@ public class GameLabel extends JLabel implements ActionListener, KeyListener {
 		grid = new Color[height][width]; // 以grid[y][x]的方式调用。y-竖直方向-高度，x-水平方向-宽度
 		
 		// 测试用
-		for(int i=2; i<width; i++)
-			grid[0][i] = Color.BLUE; 
+		for(int i=2; i<width; i++) {
+			grid[0][i] = Color.BLUE;
+			grid[1][i] = Color.BLUE;
+		}
 		
 		// 设置大小
 		setPreferredSize(new Dimension(width * blockSize, height * blockSize));
@@ -176,18 +178,24 @@ public class GameLabel extends JLabel implements ActionListener, KeyListener {
 		Set<Entry<Integer,Boolean>> s = fullLine.entrySet();
 		for(Map.Entry<Integer, Boolean> i : s)
 			for(int j=0; j<width; j++)
-				if(grid[i.getKey()][j] == null)
-					i.setValue(false);
+				if(grid[i.getKey()][j] == null) {
+					i.setValue(false); // TODO: 看看能不能直接从map中删掉
+					break;
+				}
 		
 		// 将满行消掉得分
+		// 先计算第n行方块将下落的高度shift[n]，再将该行向下移动
+		int[] shift = new int[height]; // 背景中第y行下落行数
 		for(Map.Entry<Integer, Boolean> i : fullLine.entrySet()) {
 			if(i.getValue() == false) // 不是满行，跳过
 				continue;
 			System.out.println("得分");
-			for(int j=i.getKey(); j<height-1; j++) // 将上方的方块落下
-				for(int k=0; k<width; k++)
-					grid[j][k] = grid[j+1][k];
+			for(int j=i.getKey() + 1; j < height; shift[j]++, j++); // 满行上方对应的位移++
 		}
+		// 将每行向下移动
+		for(int i=1; i < height; i++)
+			for(int k=0; k<width; k++)
+				grid[i-shift[i]][k] = grid[i][k];
 	}
 	
 	/**
