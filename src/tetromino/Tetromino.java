@@ -40,7 +40,7 @@ public abstract class Tetromino {
 		g = _g;
 		rotationState = new Random().nextInt(4);
 		position = new Coordinate(GameLabel.width / 2,
-									GameLabel.height);
+									GameLabel.height - 2);
 	}
 	
 	/**
