@@ -12,6 +12,12 @@
 package tetromino;
 
 import java.awt.Color;
+import java.io.File;
+import java.lang.reflect.InvocationTargetException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Random;
+
 import main.Coordinate;
 import main.GameLabel;
 
@@ -92,6 +98,68 @@ public abstract class Tetromino {
 				return;
 			}
 		}
+	}
+	
+	/** 
+	 * 随机生成一个骨牌
+	 * @param _g 游戏面板
+	 * @return 返回随机骨牌
+	 */
+	public static Tetromino randomTetromino(GameLabel _g) {
+		Tetromino ret = null;
+		ArrayList<Class<?>> tetrominos = getTetrominos();
+		Random r = new Random();
+		int idx = r.nextInt(tetrominos.size());
+	
+		// 应该不会产生错误
+		try {
+			ret = (Tetromino) tetrominos.get(idx)
+					.getDeclaredConstructor(
+							new Class[] {GameLabel.class})
+							.newInstance(_g);
+		} catch (InstantiationException e) {
+		} catch (IllegalAccessException e) {
+		} catch (IllegalArgumentException e) { // 传入的参数是正确的
+		} catch (InvocationTargetException e) {
+	    } catch (NoSuchMethodException e) {
+		} catch (SecurityException e) {
+		}
+		
+		return ret;
+	}
+	
+	/** 
+	 * 获取骨牌种类列表
+	 * @return 骨牌种类的ArrayList
+	 */
+	public static ArrayList<Class<?>> getTetrominos() {
+		ArrayList<Class<?>> ret = new ArrayList<Class<?>>();
+	    String pkg = Tetromino.class.getPackage().getName();
+	    String relPath = pkg.replace('.', '/');
+
+	    URL resource = ClassLoader.getSystemClassLoader().getResource(relPath);
+	    if (resource == null) {
+	        throw new RuntimeException("Unexpected problem: No resource for "
+	                + relPath);
+	    }
+
+	    File f = new File(resource.getPath());
+
+	    String[] files = f.list();
+
+	    for (int i = 0; i < files.length; i++) {
+	        String fileName = files[i];
+	        if (fileName.endsWith(".class")) {
+	            String fileNm = fileName.substring(0, fileName.length() - 6);
+	            if(fileNm.equals("Tetromino")) // 去掉基类本身
+	            		continue;
+	            String className = pkg + '.' + fileNm;
+	            try {
+					ret.add(Class.forName(className));
+				} catch (ClassNotFoundException e) {} 
+	        }
+	    }
+	    return ret;
 	}
 	
 	/**

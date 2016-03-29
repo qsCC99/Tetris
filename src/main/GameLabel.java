@@ -62,7 +62,7 @@ public class GameLabel extends JLabel implements ActionListener, KeyListener {
 		setPreferredSize(new Dimension(width * blockSize, height * blockSize));
 		setFocusable(true);
 		requestFocus();
-		currentTetromino = new OTetromino(this); // 初始化方块
+		currentTetromino = Tetromino.randomTetromino(this); // 初始化方块
 		
 		// 动画计时
 		animationTimer = new Timer(10, this); // 约100 fps
@@ -121,7 +121,7 @@ public class GameLabel extends JLabel implements ActionListener, KeyListener {
 					return;
 				}
 				scoring(); // 尝试消行
-				currentTetromino = new OTetromino(this);
+				currentTetromino = Tetromino.randomTetromino(this);
 				fallingTimer.restart(); 
 				// TODO：查阅相关标准，查看新方块的下落间隔时间和起始位置
 			}
