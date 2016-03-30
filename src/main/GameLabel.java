@@ -45,10 +45,19 @@ public class GameLabel extends JLabel implements ActionListener, KeyListener {
 	Tetromino currentTetromino = null;
 	Timer animationTimer;
 	Timer fallingTimer;
+	int score;
+	int level;
+	int upgradeCounter;
 	public static final int width = 20; // X方向方格数
 	public static final int height = 25; // Y方向方格数
 	static final int blockSize = 25; //每个正方形方格的大小
-	static final int downInterval = 300; // 方块下落间隔
+	static final int[] downInterval = 
+		{ 530, 490, 450, 410, 370, 
+		  330, 280, 220, 170, 110, 
+		  100, 90, 80, 70, 60, 60, 
+		  50, 50, 40, 40, 30}; // 每个等级的方块下落间隔
+	static final int[] scorePerLevel = 
+		{0, 40, 100, 300, 1200}; // 消掉n行的基础分数
 	GameLabel() {
 		grid = new Color[height][width]; // 以grid[y][x]的方式调用。y-竖直方向-高度，x-水平方向-宽度
 		
@@ -70,7 +79,7 @@ public class GameLabel extends JLabel implements ActionListener, KeyListener {
 		animationTimer.start();
 		
 		// 下落计时
-		fallingTimer = new Timer(downInterval, this);
+		fallingTimer = new Timer(downInterval[level], this);
 		fallingTimer.setRepeats(true);
 		fallingTimer.start();
 		
@@ -180,6 +189,7 @@ public class GameLabel extends JLabel implements ActionListener, KeyListener {
 			if(!fullLine.containsKey(b[i].y))
 				fullLine.put(b[i].y, true);
 		
+		int lineCount = 0;
 		// 检查各个y坐标，查看是否为满行。否则置false
 		Set<Entry<Integer,Boolean>> s = fullLine.entrySet();
 		for(Map.Entry<Integer, Boolean> i : s)
@@ -195,13 +205,28 @@ public class GameLabel extends JLabel implements ActionListener, KeyListener {
 		for(Map.Entry<Integer, Boolean> i : fullLine.entrySet()) {
 			if(i.getValue() == false) // 不是满行，跳过
 				continue;
-			System.out.println("得分");
+			lineCount++;
 			for(int j=i.getKey() + 1; j < height; shift[j]++, j++); // 满行上方对应的位移++
 		}
 		// 将每行向下移动
 		for(int i=1; i < height; i++)
 			for(int k=0; k<width; k++)
 				grid[i-shift[i]][k] = grid[i][k];
+		
+		// 按照 Original Nintendo Scoring System 记分
+		if(lineCount > 0) {
+			score += scorePerLevel[lineCount] * (level + 1);
+			System.out.printf("积分: %d, 等级: %d\n", score, level);
+		}
+		
+		// 计算升级。
+		// 升级规则参考http://tetris.wikia.com/wiki/Tetris_(Game_Boy)
+		upgradeCounter += lineCount;
+		while (upgradeCounter >= 10) {
+			upgradeCounter -= 10;
+			level++;
+			fallingTimer.setDelay(downInterval[level]);
+		}
 	}
 	
 	/**
