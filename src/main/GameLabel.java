@@ -48,9 +48,9 @@ public class GameLabel extends JLabel implements ActionListener, KeyListener {
 	int score;
 	int level;
 	int upgradeCounter;
-	public static final int width = 20; // X方向方格数
-	public static final int height = 25; // Y方向方格数
-	static final int blockSize = 25; //每个正方形方格的大小
+	public static final int width = 10; // X方向方格数
+	public static final int height = 20; // Y方向方格数
+	static final int blockSize = 35; //每个正方形方格的大小
 	static final int[] downInterval = 
 		{ 530, 490, 450, 410, 370, 
 		  330, 280, 220, 170, 110, 
